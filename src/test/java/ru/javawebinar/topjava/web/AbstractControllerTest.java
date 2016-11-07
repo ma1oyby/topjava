@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.filter.CharacterEncodingFilter;
 import ru.javawebinar.topjava.repository.JpaUtil;
+import ru.javawebinar.topjava.service.MealService;
 import ru.javawebinar.topjava.service.UserService;
 
 import javax.annotation.PostConstruct;
