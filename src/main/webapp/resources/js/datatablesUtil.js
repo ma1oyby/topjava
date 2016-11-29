@@ -39,6 +39,10 @@ function updateTable() {
     });
 }
 
+function updateTableByData(data) {
+    
+}
+
 function save() {
     var form = $('#detailsForm');
     $.ajax({
