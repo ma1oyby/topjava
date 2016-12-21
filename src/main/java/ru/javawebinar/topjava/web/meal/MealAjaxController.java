@@ -24,21 +24,23 @@ public class MealAjaxController extends AbstractMealController {
         return super.getAll();
     }
 
+//    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+//    public Meal get(@PathVariable("id") int id){
+//        return super.get(id);
+//    }
+
     @DeleteMapping(value = "/{id}")
     public void delete(@PathVariable("id") int id) {
         super.delete(id);
     }
 
     @PostMapping
-    public void updateOrCreate(@RequestParam("id") Integer id,
-                               @RequestParam("dateTime") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateTime,
-                               @RequestParam("description") String description,
-                               @RequestParam("calories") int calories) {
-        Meal meal = new Meal(id, dateTime, description, calories);
+    public void updateOrCreate(Meal meal) {
+        //Meal meal = new Meal(id, dateTime, description, calories);
         if (meal.isNew()) {
             super.create(meal);
         } else {
-            super.update(meal, id);
+            super.update(meal, meal.getUser().getId());
         }
     }
 
