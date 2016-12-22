@@ -43,6 +43,7 @@ public class Meal extends BaseEntity {
 
     @Column(name = "calories", nullable = false)
     @Range(min = 10, max = 5000)
+    @NotNull
     protected Integer calories;
 
     @ManyToOne(fetch = FetchType.LAZY)

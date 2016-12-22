@@ -8,6 +8,7 @@ function makeEditable() {
 }
 
 function add(add_title) {
+    debugger;
     $('#modalTitle').html(add_title);
     form.find(":input").val("");
     $('#editRow').modal();

@@ -1,11 +1,15 @@
 package ru.javawebinar.topjava.web.meal;
 
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.to.MealWithExceed;
 
+import javax.validation.Valid;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -24,10 +28,10 @@ public class MealAjaxController extends AbstractMealController {
         return super.getAll();
     }
 
-//    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-//    public Meal get(@PathVariable("id") int id){
-//        return super.get(id);
-//    }
+    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Meal get(@PathVariable("id") int id){
+        return super.get(id);
+    }
 
     @DeleteMapping(value = "/{id}")
     public void delete(@PathVariable("id") int id) {
@@ -35,13 +39,18 @@ public class MealAjaxController extends AbstractMealController {
     }
 
     @PostMapping
-    public void updateOrCreate(Meal meal) {
-        //Meal meal = new Meal(id, dateTime, description, calories);
+    public ResponseEntity<String> updateOrCreate(@Valid Meal meal, BindingResult result) {
+        if (result.hasErrors()) {
+            StringBuilder builder = new StringBuilder();
+            result.getFieldErrors().forEach(fieldError -> builder.append(fieldError.getField()).append(" ").append(fieldError.getDefaultMessage()).append(" "));
+            return new ResponseEntity<>(builder.toString(), HttpStatus.UNPROCESSABLE_ENTITY);
+        }
         if (meal.isNew()) {
             super.create(meal);
         } else {
-            super.update(meal, meal.getUser().getId());
+            super.update(meal, meal.getId());
         }
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PostMapping(value = "/filter", produces = MediaType.APPLICATION_JSON_VALUE)

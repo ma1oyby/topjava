@@ -49,7 +49,7 @@
                         </div>
                     </div>
                 </form>
-                <a class="btn btn-sm btn-info" onclick="add()"><fmt:message key="meals.add"/></a>
+                <a class="btn btn-sm btn-info" onclick="add('<fmt:message key="meals.add"/>')"><fmt:message key="meals.add"/></a>
                 <table class="table table-striped display" id="datatable">
                     <thead>
                     <tr>
@@ -60,20 +60,20 @@
                         <th></th>
                     </tr>
                     </thead>
-                    <c:forEach items="${meals}" var="meal">
-                        <jsp:useBean id="meal" scope="page" type="ru.javawebinar.topjava.to.MealWithExceed"/>
-                        <tr class="${meal.exceed ? 'exceeded' : 'normal'}">
-                            <td>
-                                    <%--<fmt:parseDate value="${meal.dateTime}" pattern="y-M-dd'T'H:m" var="parsedDate"/>--%>
-                                    <%--<fmt:formatDate value="${parsedDate}" pattern="yyyy.MM.dd HH:mm" />--%>
-                                    ${fn:formatDateTime(meal.dateTime)}
-                            </td>
-                            <td>${meal.description}</td>
-                            <td>${meal.calories}</td>
-                            <td><a class="btn btn-xs btn-primary"><fmt:message key="common.update"/></a></td>
-                            <td><a class="btn btn-xs btn-danger" onclick="deleteRow(${meal.id})"><fmt:message key="common.delete"/></a></td>
-                        </tr>
-                    </c:forEach>
+                    <%--<c:forEach items="${meals}" var="meal">--%>
+                        <%--<jsp:useBean id="meal" scope="page" type="ru.javawebinar.topjava.to.MealWithExceed"/>--%>
+                        <%--<tr class="${meal.exceed ? 'exceeded' : 'normal'}">--%>
+                            <%--<td>--%>
+                                    <%--&lt;%&ndash;<fmt:parseDate value="${meal.dateTime}" pattern="y-M-dd'T'H:m" var="parsedDate"/>&ndash;%&gt;--%>
+                                    <%--&lt;%&ndash;<fmt:formatDate value="${parsedDate}" pattern="yyyy.MM.dd HH:mm" />&ndash;%&gt;--%>
+                                    <%--${fn:formatDateTime(meal.dateTime)}--%>
+                            <%--</td>--%>
+                            <%--<td>${meal.description}</td>--%>
+                            <%--<td>${meal.calories}</td>--%>
+                            <%--<td><a class="btn btn-xs btn-primary"><fmt:message key="common.update"/></a></td>--%>
+                            <%--<td><a class="btn btn-xs btn-danger" onclick="deleteRow(${meal.id})"><fmt:message key="common.delete"/></a></td>--%>
+                        <%--</tr>--%>
+                    <%--</c:forEach>--%>
                 </table>
             </div>
         </div>
@@ -86,7 +86,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h2 class="modal-title"><fmt:message key="meals.add"/></h2>
+                <h2 class="modal-title" id="modalTitle"/>
             </div>
             <div class="modal-body">
                 <form class="form-horizontal" method="post" id="detailsForm">
@@ -128,6 +128,14 @@
     </div>
 </div>
 </body>
+<script type="text/javascript">
+    var i18n = [];
+    <c:forEach var='key' items='<%=new String[]{"common.update","common.delete","common.deleted","common.saved","common.enabled","common.disabled","common.failed"}%>'>
+    i18n['${key}'] = '<fmt:message key="${key}"/>';
+    </c:forEach>
+
+    var edit_title ='<fmt:message key="meals.edit"/>';
+</script>
 <script type="text/javascript" src="webjars/jquery/2.2.4/jquery.min.js"></script>
 <script type="text/javascript" src="webjars/bootstrap/3.3.7-1/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="webjars/datatables/1.10.12/js/jquery.dataTables.min.js"></script>
@@ -135,6 +143,7 @@
 <script type="text/javascript" src="webjars/noty/2.3.8/js/noty/packaged/jquery.noty.packaged.min.js"></script>
 <script type="text/javascript" src="resources/js/datatablesUtil.js"></script>
 <script type="text/javascript">
+
     var ajaxUrl = 'ajax/profile/meals/';
     var datatableApi;
 
@@ -149,11 +158,21 @@
 
     $(function () {
         datatableApi = $('#datatable').DataTable({
+            "ajax":{
+                "url":ajaxUrl,
+                "dataSrc":""
+            },
             "paging": false,
             "info": true,
             "columns": [
                 {
-                    "data": "dateTime"
+                    "data": "dateTime",
+                    "render": function (date, type, row) {
+                        if (type == 'display') {
+                            return date.replace('T', ' ');
+                        }
+                        return date;
+                    }
                 },
                 {
                     "data": "description"
@@ -163,11 +182,13 @@
                 },
                 {
                     "defaultContent": "<fmt:message key="common.update"/>",
-                    "orderable": false
+                    "orderable": false,
+                    "render": renderEditBtn
                 },
                 {
                     "defaultContent": "<fmt:message key="common.delete"/>",
-                    "orderable": false
+                    "orderable": false,
+                    "render": renderDeleteBtn
                 }
             ],
             "order": [
@@ -175,13 +196,18 @@
                     0,
                     "desc"
                 ]
-            ]
+            ],
+            "createdRow": function (row, data, dataIndex) {
+                $(row).addClass(data.exceed ? "exceeded" : "normal");
+            },
+            "initComplete": function () {
+                $('#filter').submit(function () {
+                    updateTable();
+                    return false;
+                });
+                makeEditable();
+            }
         });
-        $('#filter').submit(function () {
-            updateTable();
-            return false;
-        });
-        makeEditable();
     });
 </script>
 </html>
