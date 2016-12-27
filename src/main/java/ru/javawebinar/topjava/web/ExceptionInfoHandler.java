@@ -6,11 +6,15 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.BindException;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import ru.javawebinar.topjava.util.exception.ErrorInfo;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
 
 /**
  * User: gkislin
@@ -34,6 +38,25 @@ public class ExceptionInfoHandler {
     @Order(Ordered.HIGHEST_PRECEDENCE + 1)
     public ErrorInfo conflict(HttpServletRequest req, DataIntegrityViolationException e) {
         return logAndGetErrorInfo(req, e, true);
+    }
+
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST)  // 400
+    @ExceptionHandler(BindException.class)
+    @ResponseBody
+    @Order(Ordered.HIGHEST_PRECEDENCE + 2)
+    public ErrorInfo bindValidationError(HttpServletRequest req, BindingResult result) {
+        String detail = result.getFieldErrors().stream().map(fieldError -> fieldError.getField()+' '+fieldError.getDefaultMessage()).toString();
+        return new ErrorInfo(req.getRequestURL(), "Exception", detail);
+    }
+
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST)  // 400
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseBody
+    @Order(Ordered.HIGHEST_PRECEDENCE + 2)
+    public ErrorInfo restValErr(HttpServletRequest req, MethodArgumentNotValidException e) {
+        BindingResult result = e.getBindingResult();
+        result.getFieldErrors().stream().map(fieldError -> fieldError.getField()+' '+fieldError.getDefaultMessage());
+        return new ErrorInfo(req.getRequestURL(), "Exception", result.toString());
     }
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
