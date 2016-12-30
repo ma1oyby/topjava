@@ -1,12 +1,15 @@
 package ru.javawebinar.topjava.model;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotEmpty;
+import org.hibernate.validator.constraints.SafeHtml;
 import org.springframework.util.CollectionUtils;
+import ru.javawebinar.topjava.View;
 import ru.javawebinar.topjava.util.UserUtil;
 
 import javax.persistence.*;
@@ -37,11 +40,14 @@ public class User extends NamedEntity {
     @Column(name = "email", nullable = false, unique = true)
     @Email
     @NotEmpty
+    @SafeHtml
     private String email;
 
     @Column(name = "password", nullable = false)
     @NotEmpty
     @Length(min = 5)
+    @JsonView(View.REST.class)
+    @SafeHtml
     private String password;
 
     @Column(name = "enabled", nullable = false)
@@ -58,7 +64,7 @@ public class User extends NamedEntity {
     @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
     private Set<Role> roles;
 
-    @Column(name = "calories_per_day", columnDefinition = "default 2000")
+    @Column(name = "calories_per_day", columnDefinition = "int default 2000")
     @Digits(fraction = 0, integer = 4)
     private int caloriesPerDay = UserUtil.DEFAULT_CALORIES_PER_DAY;
 
